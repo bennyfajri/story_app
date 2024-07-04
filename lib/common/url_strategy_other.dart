@@ -1,3 +1,1 @@
-void usePathUrlStrategy() {
-
-}
+void usePathUrlStrategy() {}

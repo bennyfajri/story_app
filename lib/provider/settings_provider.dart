@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:story_app/common/styles.dart';
 import 'package:story_app/data/db/settings_prefs.dart';

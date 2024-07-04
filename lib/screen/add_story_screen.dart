@@ -30,7 +30,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Story"),
+        title: Text(appLocale.add_story),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -56,12 +56,12 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                   children: [
                     ElevatedButton(
                       onPressed: _onGalleryView,
-                      child: const Text("Gallery"),
+                      child: Text(appLocale.gallery),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: _onCameraView,
-                      child: const Text("Camera"),
+                      child: Text(appLocale.camera),
                     ),
                   ],
                 ),

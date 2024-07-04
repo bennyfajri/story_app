@@ -12,7 +12,9 @@ import 'package:story_app/routes/route_information_parser.dart';
 import 'package:story_app/routes/router_delegate.dart';
 import 'package:story_app/util/setup_init.dart';
 
-import 'common/url_strategy.dart';
+import 'common/url_strategy_other.dart';
+
+
 
 void main() {
   setupLocator();

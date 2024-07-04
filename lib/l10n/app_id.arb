@@ -24,5 +24,7 @@
   "add_story" : "Tambah Story",
   "description": "Deskripsi",
   "description_hint": "Masukkan deskripsi",
-  "description_error_msg": "Deskripsi tidak boleh kosong"
+  "description_error_msg": "Deskripsi tidak boleh kosong",
+  "gallery": "Galeri",
+  "camera": "Kamera"
 }
