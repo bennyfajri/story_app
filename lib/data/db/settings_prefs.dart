@@ -7,6 +7,7 @@ class SettingPrefs {
 
   static const darkTheme = 'DARK_THEME';
   static const appLocale = 'APP_LOCALE';
+  static const premiumUser = 'PREMIUM_USER';
 
   Future<bool> get isDarkTheme async {
     final prefs = await sharedPreferences;
@@ -16,6 +17,16 @@ class SettingPrefs {
   void setDarkTheme(bool value) async {
     final prefs = await sharedPreferences;
     prefs.setBool(darkTheme, value);
+  }
+
+  Future<bool> get isPremiumUser async {
+    final prefs = await sharedPreferences;
+    return prefs.getBool(premiumUser) ?? false;
+  }
+
+  void setPremiumUser(bool value) async {
+    final prefs = await sharedPreferences;
+    prefs.setBool(premiumUser, value);
   }
 
   Future<String> get appLanguage async {

@@ -13,17 +13,25 @@ class StoryService {
     required List<int> bytes,
     required fileName,
     required String token,
+    double? lat,
+    double? lng,
   }) async {
     final multipartFile = MultipartFile.fromBytes(
       bytes,
       filename: fileName,
     );
-    final formData = FormData.fromMap(
-      {
-        "description": desc,
-        "photo": multipartFile,
-      },
-    );
+    final mapData = lat != null || lng != null
+        ? {
+            "description": desc,
+            "photo": multipartFile,
+            "lat": lat,
+            "lon": lng,
+          }
+        : {
+            "description": desc,
+            "photo": multipartFile,
+          };
+    final formData = FormData.fromMap(mapData);
 
     try {
       final response = await client.post(
@@ -48,13 +56,17 @@ class StoryService {
 
   Future<ServerResponse> getStories({
     required String token,
-    int? page,
-    int? size,
+    int? page = 1,
+    int? size = 10,
     String? location,
   }) async {
     try {
       final response = await client.get(
         "${baseUrl}stories",
+        queryParameters: {
+          "page": page,
+          "size": size,
+        },
         options: Options(
           headers: {
             "Authorization": "Bearer $token",
@@ -74,8 +86,6 @@ class StoryService {
   Future<ServerResponse> getDetailStories({
     required String id,
     required String token,
-    int? page,
-    int? size,
     String? location,
   }) async {
     try {

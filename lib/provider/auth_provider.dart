@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:story_app/data/models/api_state/api_state.dart';
+import 'package:story_app/data/models/loading_state/loading_state.dart';
 import 'package:story_app/data/models/login/login_request.dart';
-import 'package:story_app/data/models/login/login_result.dart';
 import 'package:story_app/data/models/register/register_request.dart';
 
 import '../data/api/auth_service.dart';
@@ -10,6 +11,11 @@ class AuthProvider extends ChangeNotifier {
   final AuthService authService;
   final AuthPrefs authPrefs;
 
+  ApiState loginState = const ApiStateInitial();
+  ApiState registerState = const ApiStateInitial();
+  LoadingState accountState = const LoadingState.loaded();
+  LoadingState logoutState = const LoadingState.loaded();
+
   AuthProvider({
     required this.authService,
     required this.authPrefs,
@@ -17,15 +23,8 @@ class AuthProvider extends ChangeNotifier {
     _initLoginInfo();
   }
 
-  bool isLoadingLogin = false;
-  bool isLoadingLogout = false;
-  bool isLoadingRegister = false;
-  bool isLoggedIn = false;
-  LoginResult? loginResults;
-  String errorMessage = "";
-
   Future<bool> login(LoginRequest loginRequest) async {
-    isLoadingLogin = true;
+    loginState = const ApiState.loading();
     notifyListeners();
 
     final serverResponse = await authService.loginUser(loginRequest);
@@ -33,54 +32,54 @@ class AuthProvider extends ChangeNotifier {
       await authPrefs.login();
       await authPrefs.saveLoginInfo(serverResponse.loginResult!);
     } else {
-      errorMessage = serverResponse.message;
+      loginState = ApiState.error(serverResponse.message);
+      notifyListeners();
+      await Future.delayed(const Duration(milliseconds: 1500));
     }
-    isLoggedIn = await authPrefs.isLoggedIn();
-    loginResults = await authPrefs.getLoginInfo();
+    loginState = ApiState.loaded(serverResponse.loginResult);
+    accountState = LoadingState.loaded(serverResponse.loginResult);
 
-    isLoadingLogin = false;
     notifyListeners();
 
-    return isLoggedIn;
+    return await authPrefs.isLoggedIn();
   }
 
   Future<bool> register(RegisterRequest registerRequest) async {
-    isLoadingRegister = true;
+    registerState = const ApiState.loading();
     notifyListeners();
 
     final serverResponse = await authService.registerUser(registerRequest);
     if (serverResponse.error) {
-      errorMessage = serverResponse.message;
+      registerState = ApiState.error(serverResponse.message);
+      notifyListeners();
+      await Future.delayed(const Duration(milliseconds: 1500));
     }
 
-    isLoadingRegister = false;
+    registerState = ApiState.loaded(await authPrefs.getLoginInfo());
     notifyListeners();
 
     return !serverResponse.error;
   }
 
   Future<bool> logout() async {
-    isLoadingLogout = true;
+    logoutState = const LoadingState.loading();
     notifyListeners();
- 
+
     final logout = await authPrefs.logout();
     if (logout) {
       await authPrefs.deleteLoginInfo();
     }
-    isLoggedIn = await authPrefs.isLoggedIn();
-    loginResults = await authPrefs.getLoginInfo();
 
-    print("isLoggedIn : $isLoggedIn");
-
-    isLoadingLogout = false;
+    accountState = LoadingState.loaded(await authPrefs.getLoginInfo());
+    logoutState = LoadingState.loaded(await authPrefs.getLoginInfo());
     notifyListeners();
 
-    return !isLoggedIn;
+    return !await authPrefs.isLoggedIn();
   }
 
   void _initLoginInfo() async {
-    isLoggedIn = await authPrefs.isLoggedIn();
-    loginResults = await authPrefs.getLoginInfo();
+    final loginInfo = await authPrefs.getLoginInfo();
+    accountState = LoadingState.loaded(loginInfo);
     notifyListeners();
   }
 }

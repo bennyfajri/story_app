@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/data/models/register/register_request.dart';
-import 'package:story_app/main.dart';
+
+import '../my_app.dart';
 import '../provider/auth_provider.dart';
 import '../util/constant.dart';
 
@@ -36,6 +37,8 @@ class _LoginScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final registerState = context.watch<AuthProvider>().registerState;
+
     return Scaffold(
       body: Center(
         child: ConstrainedBox(
@@ -98,34 +101,25 @@ class _LoginScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
-                context.watch<AuthProvider>().isLoadingRegister
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: () async {
-                          hideKeyboard();
-                          if (formKey.currentState!.validate()) {
-                            final registerRequest = RegisterRequest(
-                              name: nameController.text,
-                              email: emailController.text,
-                              password: passwordController.text,
-                            );
-                            final authRead = context.read<AuthProvider>();
-                            final result =
-                                await authRead.register(registerRequest);
-                            if (result) {
-                              widget.onRegister();
-                            } else {
-                              if (context.mounted) {
-                                showSnackbar(
-                                  context: context,
-                                  message: authRead.errorMessage,
-                                );
-                              }
-                            }
-                          }
-                        },
-                        child: Text(appLocale.register),
-                      ),
+                registerState.map(
+                    initial: (value) {
+                      return buildRegisterButton(context);
+                    },
+                    loading: (value) {
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                    loaded: (value) {
+                      return buildRegisterButton(context);
+                    },
+                    error: (value) {
+                      WidgetsBinding.instance.addPostFrameCallback((_){
+                        showSnackbar(
+                          context: context,
+                          message: value.message,
+                        );
+                      });
+                      return buildRegisterButton(context);
+                    }),
                 const SizedBox(height: 8),
                 OutlinedButton(
                   onPressed: () => widget.onLogin(),
@@ -136,6 +130,27 @@ class _LoginScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  ElevatedButton buildRegisterButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        hideKeyboard();
+        if (formKey.currentState!.validate()) {
+          final registerRequest = RegisterRequest(
+            name: nameController.text,
+            email: emailController.text,
+            password: passwordController.text,
+          );
+          final authRead = context.read<AuthProvider>();
+          final result = await authRead.register(registerRequest);
+          if (result) {
+            widget.onRegister();
+          }
+        }
+      },
+      child: Text(appLocale.register),
     );
   }
 }

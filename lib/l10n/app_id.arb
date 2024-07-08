@@ -26,5 +26,25 @@
   "description_hint": "Masukkan deskripsi",
   "description_error_msg": "Deskripsi tidak boleh kosong",
   "gallery": "Galeri",
-  "camera": "Kamera"
+  "camera": "Kamera",
+  "upgrade_premium": "Upgrade Premium",
+  "premium_user": "Member Premium",
+  "upgrade_premium_desc": "Upgrade akun premium untuk mendapatkan segudang fitur tambahan",
+  "premiumPackagePrice" : "{premiumPrice}",
+  "@premiumPackagePrice": {
+    "placeholders": {
+      "premiumPrice": {
+        "type": "int",
+        "format": "simpleCurrency",
+        "optionalParameters": {
+          "decimalDigits": 0
+        }
+      }
+    }
+  },
+  "location": "Lokasi",
+  "add_location": "Pilih Lokasi",
+  "change_location": "Ubah Lokasi",
+  "only_premium_feature": "Upgrade Premium untuk menambahkan lokasi",
+  "add_location_error": "Pilih lokasi terlebih dahulu!"
 }

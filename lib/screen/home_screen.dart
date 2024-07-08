@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:story_app/main.dart';
 import 'package:story_app/screen/account_screen.dart';
 import 'package:story_app/screen/story_list_screen.dart';
+
+import '../my_app.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
     super.key,
     required this.onAddStory,
     required this.onLogout,
+    required this.onPremium,
     required this.onStoryClicked,
   });
 
   final VoidCallback onAddStory;
   final VoidCallback onLogout;
+  final VoidCallback onPremium;
   final Function(String) onStoryClicked;
 
   @override
@@ -51,6 +54,7 @@ class _HomePageState extends State<HomePage> {
       ),
       AccountScreen(
         onLogout: widget.onLogout,
+        onPremium: widget.onPremium,
       ),
     ];
   }

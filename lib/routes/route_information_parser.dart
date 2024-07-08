@@ -4,35 +4,36 @@ import 'package:flutter/widgets.dart';
 class MyRouteInformationParser
     extends RouteInformationParser<PageConfiguration> {
   @override
-  Future<PageConfiguration> parseRouteInformation(
-      RouteInformation routeInformation) async {
+  Future<PageConfiguration> parseRouteInformation(RouteInformation routeInformation) async {
     final uri = Uri.parse(routeInformation.uri.toString());
 
     if (uri.pathSegments.isEmpty) {
       return PageConfiguration.home();
     } else if (uri.pathSegments.length == 1) {
-      print(uri.pathSegments);
       final first = uri.pathSegments[0].toLowerCase();
-      if (first == 'home') {
-        return PageConfiguration.home();
-      } else if (first == 'login') {
-        return PageConfiguration.login();
-      } else if (first == 'add') {
-        return PageConfiguration.addStory();
-      } else if (first == 'register') {
-        return PageConfiguration.register();
-      } else if (first == 'splash') {
-        return PageConfiguration.splash();
-      } else {
-        return PageConfiguration.unknown();
+      switch (first) {
+        case 'home':
+          return PageConfiguration.home();
+        case 'login':
+          return PageConfiguration.login();
+        case 'add':
+          return PageConfiguration.addStory();
+        case 'upgrade_user':
+          return PageConfiguration.buyPremium();
+        case 'register':
+          return PageConfiguration.register();
+        case 'splash':
+          return PageConfiguration.splash();
+        default:
+          return PageConfiguration.unknown();
       }
     } else if (uri.pathSegments.length == 2) {
-      print(uri.pathSegments);
       final first = uri.pathSegments[0].toLowerCase();
       final second = uri.pathSegments[1].toLowerCase();
-      final quoteId = int.tryParse(second) ?? 0;
-      if (first == 'story' && (quoteId >= 1 && quoteId <= 5)) {
+      if (first == 'story') {
         return PageConfiguration.detailStory(second);
+      } else if (first == 'add' && second == 'location') {
+        return PageConfiguration.addLocation();
       } else {
         return PageConfiguration.unknown();
       }
@@ -53,6 +54,10 @@ class MyRouteInformationParser
       return RouteInformation(uri: Uri.parse('/login'));
     } else if (configuration.isAddStoryPage) {
       return RouteInformation(uri: Uri.parse('/add'));
+    } else if (configuration.isAddLocationPage) {
+      return RouteInformation(uri: Uri.parse('/add/location'));
+    } else if (configuration.isBuyPremiumPage) {
+      return RouteInformation(uri: Uri.parse('/upgrade_user'));
     } else if (configuration.isHomePage) {
       return RouteInformation(uri: Uri.parse('/'));
     } else if (configuration.isDetailPage) {

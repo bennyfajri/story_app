@@ -26,5 +26,14 @@
   "description_hint": "Enter description",
   "description_error_msg": "Deskripsi must not empty",
   "gallery": "Gallery",
-  "camera": "Camera"
+  "camera": "Camera",
+  "upgrade_premium": "Upgrade Premium",
+  "premium_user": "Member Premium",
+  "upgrade_premium_desc": "Upgrade to premium account to get premium benefit",
+  "premiumPackagePrice": "{premiumPrice}",
+  "location": "Location",
+  "add_location": "Pick Location",
+  "change_location": "Change Location",
+  "only_premium_feature": "Upgrade to premium account to use this feature",
+  "add_location_error": "Choose location first!"
 }

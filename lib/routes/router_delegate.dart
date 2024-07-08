@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:story_app/data/db/auth_prefs.dart';
 import 'package:story_app/data/models/page_config/page_configuration.dart';
 import 'package:story_app/screen/add_story_screen.dart';
+import 'package:story_app/screen/buy_premium_screen.dart';
 import 'package:story_app/screen/home_screen.dart';
+import 'package:story_app/screen/pick_location_screen.dart';
 
 import '../screen/login_screen.dart';
 import '../screen/register_screen.dart';
@@ -35,8 +37,9 @@ class MyRouterDelegate extends RouterDelegate<PageConfiguration>
   List<Page> historyStack = [];
   bool? isLoggedIn;
   bool isAddStory = false;
+  bool isAddLocation = false;
   bool isRegister = false;
-
+  bool isBuyPremium = false;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +61,11 @@ class MyRouterDelegate extends RouterDelegate<PageConfiguration>
 
         isRegister = false;
         isAddStory = false;
+        if(isAddLocation) {
+          isAddLocation = false;
+          isAddStory = true;
+        }
+        isBuyPremium = false;
         selectedStory = null;
         notifyListeners();
 
@@ -76,11 +84,25 @@ class MyRouterDelegate extends RouterDelegate<PageConfiguration>
     } else if (configuration.isHomePage ||
         configuration.isLoginPage ||
         configuration.isSplashPage ||
-        configuration.isAddStoryPage) {
+        configuration.isBuyPremiumPage) {
       isUnknown = false;
       selectedStory = null;
       isRegister = false;
-      isAddStory = false;
+
+      isAddLocation = false;
+      isBuyPremium = false;
+    } else if (configuration.isAddStoryPage) {
+      isUnknown = false;
+      selectedStory = null;
+      isRegister = false;
+      isAddStory = true;
+      isAddLocation = false;
+    }else if (configuration.isAddLocationPage) {
+      isUnknown = false;
+      selectedStory = null;
+      isRegister = false;
+      isAddStory = true;
+      isAddLocation = isAddLocation;
     } else if (configuration.isDetailPage) {
       isUnknown = false;
       isRegister = false;
@@ -101,6 +123,10 @@ class MyRouterDelegate extends RouterDelegate<PageConfiguration>
       return PageConfiguration.login();
     } else if (isAddStory == true) {
       return PageConfiguration.addStory();
+    } else if (isAddLocation == true) {
+      return PageConfiguration.addLocation();
+    } else if (isBuyPremium == true) {
+      return PageConfiguration.buyPremium();
     } else if (isUnknown == true) {
       return PageConfiguration.unknown();
     } else if (selectedStory == null) {
@@ -165,6 +191,10 @@ class MyRouterDelegate extends RouterDelegate<PageConfiguration>
               selectedStory = storyId;
               notifyListeners();
             },
+            onPremium: () {
+              isBuyPremium = true;
+              notifyListeners();
+            },
           ),
         ),
         if (selectedStory != null)
@@ -175,14 +205,38 @@ class MyRouterDelegate extends RouterDelegate<PageConfiguration>
             ),
           ),
         if (isAddStory == true)
-           MaterialPage(
+          MaterialPage(
             key: const ValueKey("AddStoryPage"),
             child: AddStoryScreen(
               onSuccessUpload: () {
                 isAddStory = false;
                 notifyListeners();
               },
+              onAddLocation: () {
+                isAddLocation = true;
+                notifyListeners();
+              },
             ),
-          )
+          ),
+        if (isAddLocation == true)
+          MaterialPage(
+            key: const ValueKey("AddLocationPage"),
+            child: PickLocationScreen(
+              onAdded: () {
+                isAddLocation = false;
+                notifyListeners();
+              },
+            ),
+          ),
+        if (isBuyPremium == true)
+          MaterialPage(
+            key: const ValueKey("BuyPremiumPage"),
+            child: BuyPremiumScreen(
+              onSuccess: () {
+                isBuyPremium = false;
+                notifyListeners();
+              },
+            ),
+          ),
       ];
 }

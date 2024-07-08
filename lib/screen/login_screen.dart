@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/data/models/login/login_request.dart';
-import 'package:story_app/main.dart';
 import 'package:story_app/util/constant.dart';
 
+import '../my_app.dart';
 import '../provider/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -36,6 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loginState = context.watch<AuthProvider>().loginState;
+
     return Scaffold(
       body: Center(
         child: ConstrainedBox(
@@ -69,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: passwordController,
                   obscureText: isPasswordHide,
                   decoration: InputDecoration(
-                    hintText:appLocale.password_hint,
+                    hintText: appLocale.password_hint,
                     suffixIcon: IconButton(
                       icon: isPasswordHide
                           ? const Icon(CupertinoIcons.eye_fill)
@@ -89,33 +91,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
-                if (context.watch<AuthProvider>().isLoadingLogin)
-                  const Center(child: CircularProgressIndicator())
-                else
-                  ElevatedButton(
-                    onPressed: () async {
-                      hideKeyboard();
-                      if (formKey.currentState!.validate()) {
-                        final loginRequest = LoginRequest(
-                          email: emailController.text,
-                          password: passwordController.text,
-                        );
-                        final authRead = context.read<AuthProvider>();
-                        final result = await authRead.login(loginRequest);
-                        if (result) {
-                          widget.onLogin();
-                        } else {
-                          if (context.mounted) {
-                            showSnackbar(
-                              context: context,
-                              message: authRead.errorMessage,
-                            );
-                          }
-                        }
-                      }
-                    },
-                    child: Text(appLocale.login),
-                  ),
+                loginState.map(initial: (value) {
+                  return buildLoginButton(context);
+                }, loading: (value) {
+                  return const Center(child: CircularProgressIndicator());
+                }, loaded: (value) {
+                  return buildLoginButton(context);
+                }, error: (value) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    showSnackbar(
+                      context: context,
+                      message: value.message,
+                    );
+                  });
+                  return buildLoginButton(context, message: value.message);
+                }),
                 const SizedBox(height: 8),
                 OutlinedButton(
                   onPressed: () => widget.onRegister(),
@@ -126,6 +116,26 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  ElevatedButton buildLoginButton(BuildContext context, {String? message}) {
+    return ElevatedButton(
+      onPressed: () async {
+        hideKeyboard();
+        if (formKey.currentState!.validate()) {
+          final loginRequest = LoginRequest(
+            email: emailController.text,
+            password: passwordController.text,
+          );
+          final authRead = context.read<AuthProvider>();
+          final result = await authRead.login(loginRequest);
+          if (result) {
+            widget.onLogin();
+          }
+        }
+      },
+      child: Text(appLocale.login),
     );
   }
 }

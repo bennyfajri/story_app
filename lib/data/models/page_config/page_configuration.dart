@@ -4,12 +4,16 @@ class PageConfiguration {
   final bool? loggedIn;
   final String? storyId;
   final bool? addStory;
+  final bool? addLocation;
+  final bool? buyPremium;
 
   PageConfiguration.splash()
       : unknown = false,
         register = false,
         loggedIn = null,
         addStory = null,
+        addLocation = null,
+        buyPremium = null,
         storyId = null;
 
   PageConfiguration.login()
@@ -17,6 +21,8 @@ class PageConfiguration {
         register = false,
         loggedIn = false,
         addStory = null,
+        addLocation = null,
+        buyPremium = null,
         storyId = null;
 
   PageConfiguration.register()
@@ -24,6 +30,8 @@ class PageConfiguration {
         register = true,
         loggedIn = false,
         addStory = null,
+        addLocation = null,
+        buyPremium = null,
         storyId = null;
 
   PageConfiguration.home()
@@ -31,6 +39,8 @@ class PageConfiguration {
         register = false,
         loggedIn = true,
         addStory = false,
+        addLocation = false,
+        buyPremium = false,
         storyId = null;
 
   PageConfiguration.addStory()
@@ -38,6 +48,26 @@ class PageConfiguration {
         register = false,
         loggedIn = true,
         addStory = true,
+        addLocation = false,
+        buyPremium = false,
+        storyId = null;
+
+  PageConfiguration.addLocation()
+      : unknown = false,
+        register = false,
+        loggedIn = true,
+        addStory = true,
+        addLocation = true,
+        buyPremium = false,
+        storyId = null;
+
+  PageConfiguration.buyPremium()
+      : unknown = false,
+        register = false,
+        loggedIn = true,
+        addStory = false,
+        addLocation = false,
+        buyPremium = true,
         storyId = null;
 
   PageConfiguration.detailStory(String id)
@@ -45,6 +75,8 @@ class PageConfiguration {
         register = false,
         loggedIn = true,
         addStory = false,
+        addLocation = false,
+        buyPremium = false,
         storyId = id;
 
   PageConfiguration.unknown()
@@ -52,6 +84,8 @@ class PageConfiguration {
         register = false,
         loggedIn = null,
         addStory = null,
+        addLocation = null,
+        buyPremium = null,
         storyId = null;
 
   bool get isSplashPage => unknown == false && loggedIn == null;
@@ -59,13 +93,37 @@ class PageConfiguration {
   bool get isLoginPage => unknown == false && loggedIn == false;
 
   bool get isHomePage =>
-      unknown == false && loggedIn == true && addStory == false && storyId == null;
+      unknown == false &&
+      loggedIn == true &&
+      addStory == false &&
+      storyId == null;
 
   bool get isAddStoryPage =>
-      unknown == false && loggedIn == true && addStory == true && storyId == null;
+      unknown == false &&
+      loggedIn == true &&
+      addStory == true &&
+      buyPremium == false &&
+      storyId == null;
+
+  bool get isAddLocationPage =>
+      unknown == false &&
+      loggedIn == true &&
+      addStory == true &&
+      addLocation == true &&
+      buyPremium == false &&
+      storyId == null;
+
+  bool get isBuyPremiumPage =>
+      unknown == false &&
+      loggedIn == true &&
+      buyPremium == true &&
+      storyId == null;
 
   bool get isDetailPage =>
-      unknown == false && loggedIn == true && addStory == false && storyId != null;
+      unknown == false &&
+      loggedIn == true &&
+      addStory == false &&
+      storyId != null;
 
   bool get isRegisterPage => register == true;
 

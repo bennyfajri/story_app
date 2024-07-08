@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:story_app/data/api/story_service.dart';
+import 'package:story_app/data/models/api_state/api_state.dart';
+import 'package:story_app/data/models/story/story.dart';
 
 import '../data/db/auth_prefs.dart';
-import '../data/models/story/story.dart';
 
 class StoryProvider extends ChangeNotifier {
   final StoryService storyService;
@@ -16,58 +17,58 @@ class StoryProvider extends ChangeNotifier {
     getStories();
   }
 
-  List<Story> _listStory = [];
-  Story? _story;
-  bool _isLoading = false;
-  bool _isLoadingDetail = false;
-  bool _isUploading = false;
-  bool _isError = false;
-  String _errorMessages = "";
+  ApiState storyState = const ApiState.initial();
+  ApiState detailStoryState = const ApiState.initial();
+  ApiState uploadStoryState = const ApiState.initial();
+  final List<Story> _listStory = [];
 
-  bool get isLoading => _isLoading;
+  int? pageItems = 1;
+  int sizeItems = 10;
 
-  bool get isLoadingDetail => _isLoadingDetail;
-
-  bool get isUploading => _isUploading;
-
-  bool get isError => _isError;
-
-  String get errorMessages => _errorMessages;
-
-  List<Story> get listStory => _listStory;
-
-  Story? get story => _story;
-
-  Future<dynamic> getStories() async {
-    try {
-      _isLoading = true;
+  Future<dynamic> getStories([bool isRefreshing = false]) async {
+    if (isRefreshing) {
+      _listStory.clear();
+      pageItems = 1;
       notifyListeners();
-
-      final loginInfo = await authPrefs.getLoginInfo();
-      final serverResponse =
-          await storyService.getStories(token: loginInfo?.token ?? "");
-      if (serverResponse.error) {
-        _isError = true;
-        _errorMessages = serverResponse.message;
-      } else {
-        if (serverResponse.listStory!.isNotEmpty) {
-          _listStory = serverResponse.listStory!;
-        }
+    }
+    try {
+      if (pageItems == 1) {
+        storyState = const ApiState.loading();
+        notifyListeners();
       }
 
-      _isLoading = false;
+      final loginInfo = await authPrefs.getLoginInfo();
+      final serverResponse = await storyService.getStories(
+        token: loginInfo?.token ?? "",
+        page: pageItems!,
+        size: sizeItems,
+      );
+      if (serverResponse.error) {
+        storyState = ApiState.error(serverResponse.message);
+        notifyListeners();
+        await Future.delayed(const Duration(milliseconds: 1500));
+      } else {
+        if (serverResponse.listStory!.isNotEmpty) {
+          _listStory.addAll(serverResponse.listStory!);
+          storyState = ApiState.loaded(_listStory);
+        }
+      }
+      if (serverResponse.listStory!.length < sizeItems) {
+        pageItems = null;
+      } else {
+        pageItems = pageItems! + 1;
+      }
+
       notifyListeners();
     } on DioException catch (e) {
-      _isError = true;
-      _errorMessages = e.message.toString();
-      _isLoading = false;
+      storyState = ApiState.error(e.message.toString());
       notifyListeners();
     }
   }
 
   Future<dynamic> getDetailStory(String storyId) async {
     try {
-      _isLoadingDetail = true;
+      detailStoryState = const ApiState.loading();
       notifyListeners();
 
       final loginInfo = await authPrefs.getLoginInfo();
@@ -76,31 +77,30 @@ class StoryProvider extends ChangeNotifier {
         token: loginInfo?.token ?? "",
       );
       if (serverResponse.error) {
-        _isError = true;
-        _errorMessages = serverResponse.message;
+        detailStoryState = ApiState.error(serverResponse.message);
+        notifyListeners();
+        await Future.delayed(const Duration(milliseconds: 1500));
       } else {
         if (serverResponse.story != null) {
-          _story = serverResponse.story!;
+          detailStoryState = ApiState.loaded(serverResponse.story!);
         }
       }
-
-      _isLoadingDetail = false;
       notifyListeners();
     } on DioException catch (e) {
-      _isError = true;
-      _errorMessages = e.message.toString();
-      _isLoadingDetail = false;
+      detailStoryState = ApiState.error(e.message.toString());
       notifyListeners();
     }
   }
 
-  Future<dynamic> addNewStory(
+  Future<bool> addNewStory(
     List<int> bytes,
     String fileName,
     String description,
+    double? lat,
+    double? lng,
   ) async {
     try {
-      _isUploading = true;
+      uploadStoryState = const ApiState.loading();
       notifyListeners();
 
       final loginInfo = await authPrefs.getLoginInfo();
@@ -109,22 +109,23 @@ class StoryProvider extends ChangeNotifier {
         fileName: fileName,
         token: loginInfo?.token ?? "",
         desc: description,
+        lat: lat,
+        lng: lng,
       );
       if (serverResponse.error) {
-        _isError = true;
-        _errorMessages = serverResponse.message;
+        uploadStoryState = ApiState.error(serverResponse.message);
+        notifyListeners();
+        await Future.delayed(const Duration(milliseconds: 1500));
+        return false;
       } else {
-        _isError = false;
-        _errorMessages = "";
+        uploadStoryState = const ApiState.loaded(true);
+        notifyListeners();
+        return true;
       }
-
-      _isUploading = false;
-      notifyListeners();
     } on DioException catch (e) {
-      _isError = true;
-      _errorMessages = e.message.toString();
-      _isUploading = false;
+      uploadStoryState = ApiState.error(e.message.toString());
       notifyListeners();
+      return false;
     }
   }
 }
