@@ -17,18 +17,17 @@ import '../data/db/settings_prefs.dart';
 GetIt getIt = GetIt.I;
 
 void setupLocator() {
+  final sharedPrefs = SharedPreferences.getInstance();
   getIt.registerLazySingleton(() => Dio()..interceptors.add(LogInterceptor(requestBody: true)));
   getIt.registerLazySingleton(() => AuthService(client: getIt<Dio>()));
   getIt.registerLazySingleton(() => StoryService(client: getIt<Dio>()));
   getIt.registerLazySingleton(() {
-    final sharedPrefs = SharedPreferences.getInstance();
     return AuthPrefs(sharedPreferences: sharedPrefs);
   });
   getIt.registerLazySingleton(() {
-    final sharedPrefs = SharedPreferences.getInstance();
     return SettingPrefs(sharedPreferences: sharedPrefs);
   });
-  getIt.registerLazySingleton(() => MyRouterDelegate(authRepository: getIt<AuthPrefs>()));
+  getIt.registerLazySingleton(() => MyRoute(authPrefs: getIt.get<AuthPrefs>()));
   getIt.registerLazySingleton(() => MyRouteInformationParser());
   getIt.registerLazySingleton(() => AuthProvider(authService: getIt<AuthService>(), authPrefs: getIt<AuthPrefs>()));
   getIt.registerLazySingleton(() => SettingsProvider(settingPrefs: getIt<SettingPrefs>()));

@@ -30,13 +30,14 @@ class MyApp extends StatelessWidget {
       child: Consumer<SettingsProvider>(
         builder: (context, provider, child) {
           return MaterialApp.router(
-            routerDelegate: myRouterDelegate,
+            routerConfig: myRoute.appRouter(),
             locale: provider.locale,
             debugShowCheckedModeBanner: false,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
+            /* routerDelegate: myRouterDelegate,
             routeInformationParser: myRouteInformationParser,
-            backButtonDispatcher: RootBackButtonDispatcher(),
+            backButtonDispatcher: RootBackButtonDispatcher(),*/
             theme: provider.themeData,
           );
         },
@@ -45,10 +46,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
-MyRouterDelegate get myRouterDelegate => getIt<MyRouterDelegate>();
+MyRoute get myRoute => getIt<MyRoute>();
 
-AppLocalizations get appLocale => AppLocalizations.of(
-    getIt<MyRouterDelegate>().navigatorKeys.currentContext!)!;
+AppLocalizations get appLocale {
+  final currentContext = getIt<MyRoute>().appRouter().configuration.navigatorKey.currentContext;
+  return AppLocalizations.of(currentContext!)!;
+}
 
 AuthService get authService => getIt<AuthService>();
 

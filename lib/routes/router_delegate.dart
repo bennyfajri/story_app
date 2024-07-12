@@ -1,8 +1,6 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:story_app/data/db/auth_prefs.dart';
-import 'package:story_app/data/models/page_config/page_configuration.dart';
 import 'package:story_app/screen/add_story_screen.dart';
 import 'package:story_app/screen/buy_premium_screen.dart';
 import 'package:story_app/screen/home_screen.dart';
@@ -13,230 +11,157 @@ import '../screen/register_screen.dart';
 import '../screen/splash_screen.dart';
 import '../screen/story_detail_screen.dart';
 
-class MyRouterDelegate extends RouterDelegate<PageConfiguration>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin {
-  final GlobalKey<NavigatorState> navigatorKeys;
-  final AuthPrefs authRepository;
-  bool? isUnknown;
+class MyRoute {
+  static String auth = "/auth";
+  static String login = "login";
+  static String register = "auths/register";
 
-  MyRouterDelegate({
-    required this.authRepository,
-  }) : navigatorKeys = GlobalKey<NavigatorState>() {
+  static String home = "/";
+
+  static String buyPremium = "/buy_premium";
+  static String splash = "/splash";
+
+  static String detailStory = "story/:storyId";
+  static String addStory = "add_story";
+  static String addLocation = "/add_location";
+
+  static String toDetailStory(String storyId) => "/story/$storyId";
+
+  static String toAddStory() => "/add_story";
+
+  static String toSettingBuyPremium() => "/buy_premium";
+
+  static String toLogin() => "/auth/login";
+
+  static String toRegister() => "/auth/register";
+
+  final AuthPrefs authPrefs;
+  bool isLoggedIn = false;
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  MyRoute({required this.authPrefs}) {
     _init();
   }
 
-  _init() async {
-    isLoggedIn = await authRepository.isLoggedIn();
-    notifyListeners();
-  }
+  GoRouter appRouter() => GoRouter(
+        navigatorKey: navigatorKey,
+        routes: <GoRoute>[
+          GoRoute(
+            path: splash,
+            pageBuilder: (context, state) => FadeTransitionPage(
+              key: state.pageKey,
+              child: const SplashScreen(),
+            ),
+            redirect: (_, __) => isLoggedIn ? home : login,
+          ),
+          GoRoute(
+              path: home,
+              pageBuilder: (context, state) => FadeTransitionPage(
+                    key: state.pageKey,
+                    child: HomePage(
+                      onAddStory: () => context.go(toAddStory()),
+                      onPremium: () => context.go(toSettingBuyPremium()),
+                      onLogout: () => context.go(toLogin()),
+                      onStoryClicked: (id) => context.go(toDetailStory(id)),
+                    ),
+                  ),
+              routes: [
+                GoRoute(
+                  path: detailStory,
+                  pageBuilder: (context, state) => FadeTransitionPage(
+                    key: state.pageKey,
+                    child: StoryDetailScreen(
+                      storyId: state.pathParameters['storyId']!,
+                    ),
+                  ),
+                ),
+                GoRoute(
+                  path: addStory,
+                  pageBuilder: (context, state) => FadeTransitionPage(
+                    key: state.pageKey,
+                    child: AddStoryScreen(
+                      onAddLocation: () {},
+                      onSuccessUpload: () {},
+                    ),
+                  ),
+                ),
+              ]),
+          GoRoute(
+            path: auth,
+            pageBuilder: (context, state) => FadeTransitionPage(
+              key: state.pageKey,
+              child: LoginScreen(
+                onLogin: () => context.go(home),
+                onRegister: () => context.push(toRegister()),
+              ),
+            ),
+            routes: [
+              GoRoute(
+                path: register,
+                pageBuilder: (context, state) => FadeTransitionPage(
+                  key: state.pageKey,
+                  child: RegisterScreen(
+                    onLogin: () => context.go(auth),
+                    onRegister: () {},
+                  ),
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: addLocation,
+            pageBuilder: (context, state) => FadeTransitionPage(
+              key: state.pageKey,
+              child: PickLocationScreen(
+                onAdded: () {},
+              ),
+            ),
+          ),
+          GoRoute(
+            path: buyPremium,
+            pageBuilder: (pageContext, state) => FadeTransitionPage(
+              key: state.pageKey,
+              child: BuyPremiumScreen(onSuccess: () {}),
+            ),
+          ),
+        ],
+        redirect: _guard,
+        debugLogDiagnostics: true,
+      );
 
-  @override
-  GlobalKey<NavigatorState>? get navigatorKey => navigatorKeys;
+  Future<String?> _guard(BuildContext context, GoRouterState state) async {
+    final bool signedIn = await authPrefs.isLoggedIn();
+    final bool signingIn = state.matchedLocation == auth;
 
-  String? selectedStory;
-  List<Page> historyStack = [];
-  bool? isLoggedIn;
-  bool isAddStory = false;
-  bool isAddLocation = false;
-  bool isRegister = false;
-  bool isBuyPremium = false;
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoggedIn == null) {
-      historyStack = _splashStack;
-    } else if (isLoggedIn == false) {
-      historyStack = _loggedOutStack;
-    } else {
-      historyStack = _loggedInStack;
+    if (!signingIn && !signedIn) {
+      return auth;
+    } else if (signingIn && signedIn) {
+      return home;
     }
-    return Navigator(
-      key: navigatorKey,
-      pages: historyStack,
-      onPopPage: (route, result) {
-        final didPop = route.didPop(result);
-        if (!didPop) {
-          return false;
-        }
 
-        isRegister = false;
-        isAddStory = false;
-        if(isAddLocation) {
-          isAddLocation = false;
-          isAddStory = true;
-        }
-        isBuyPremium = false;
-        selectedStory = null;
-        notifyListeners();
-
-        return true;
-      },
-    );
+    return null;
   }
 
-  @override
-  Future<void> setNewRoutePath(configuration) async {
-    if (configuration.isUnknownPage) {
-      isUnknown = true;
-      isRegister = false;
-    } else if (configuration.isRegisterPage) {
-      isRegister = true;
-    } else if (configuration.isHomePage ||
-        configuration.isLoginPage ||
-        configuration.isSplashPage ||
-        configuration.isBuyPremiumPage) {
-      isUnknown = false;
-      selectedStory = null;
-      isRegister = false;
-
-      isAddLocation = false;
-      isBuyPremium = false;
-    } else if (configuration.isAddStoryPage) {
-      isUnknown = false;
-      selectedStory = null;
-      isRegister = false;
-      isAddStory = true;
-      isAddLocation = false;
-    }else if (configuration.isAddLocationPage) {
-      isUnknown = false;
-      selectedStory = null;
-      isRegister = false;
-      isAddStory = true;
-      isAddLocation = isAddLocation;
-    } else if (configuration.isDetailPage) {
-      isUnknown = false;
-      isRegister = false;
-      selectedStory = configuration.storyId.toString();
-    } else {
-      log(' Could not set new route');
-    }
-    notifyListeners();
+  void _init() async {
+    isLoggedIn = await authPrefs.isLoggedIn();
   }
+}
 
-  @override
-  PageConfiguration? get currentConfiguration {
-    if (isLoggedIn == null) {
-      return PageConfiguration.splash();
-    } else if (isRegister == true) {
-      return PageConfiguration.register();
-    } else if (isLoggedIn == false) {
-      return PageConfiguration.login();
-    } else if (isAddStory == true) {
-      return PageConfiguration.addStory();
-    } else if (isAddLocation == true) {
-      return PageConfiguration.addLocation();
-    } else if (isBuyPremium == true) {
-      return PageConfiguration.buyPremium();
-    } else if (isUnknown == true) {
-      return PageConfiguration.unknown();
-    } else if (selectedStory == null) {
-      return PageConfiguration.home();
-    } else if (selectedStory != null) {
-      return PageConfiguration.detailStory(selectedStory!);
-    } else {
-      return null;
-    }
-  }
+class FadeTransitionPage extends CustomTransitionPage<void> {
+  /// Creates a [FadeTransitionPage].
+  FadeTransitionPage({
+    required LocalKey super.key,
+    required super.child,
+  }) : super(
+          transitionsBuilder: (BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                  Widget child) =>
+              FadeTransition(
+            opacity: animation.drive(_curveTween),
+            child: child,
+          ),
+        );
 
-  List<Page> get _splashStack => const [
-        MaterialPage(
-          key: ValueKey("SplashPage"),
-          child: SplashScreen(),
-        ),
-      ];
-
-  List<Page> get _loggedOutStack => [
-        MaterialPage(
-          key: const ValueKey("LoginPage"),
-          child: LoginScreen(
-            onLogin: () {
-              isLoggedIn = true;
-              notifyListeners();
-            },
-            onRegister: () {
-              isRegister = true;
-              notifyListeners();
-            },
-          ),
-        ),
-        if (isRegister == true)
-          MaterialPage(
-            key: const ValueKey("RegisterPage"),
-            child: RegisterScreen(
-              onRegister: () {
-                isRegister = false;
-                notifyListeners();
-              },
-              onLogin: () {
-                isRegister = false;
-                notifyListeners();
-              },
-            ),
-          ),
-      ];
-
-  List<Page> get _loggedInStack => [
-        MaterialPage(
-          key: const ValueKey("StoryListPage"),
-          child: HomePage(
-            onLogout: () {
-              isLoggedIn = false;
-              notifyListeners();
-            },
-            onAddStory: () {
-              isAddStory = true;
-              notifyListeners();
-            },
-            onStoryClicked: (storyId) {
-              selectedStory = storyId;
-              notifyListeners();
-            },
-            onPremium: () {
-              isBuyPremium = true;
-              notifyListeners();
-            },
-          ),
-        ),
-        if (selectedStory != null)
-          MaterialPage(
-            key: ValueKey(selectedStory),
-            child: StoryDetailScreen(
-              storyId: selectedStory ?? "",
-            ),
-          ),
-        if (isAddStory == true)
-          MaterialPage(
-            key: const ValueKey("AddStoryPage"),
-            child: AddStoryScreen(
-              onSuccessUpload: () {
-                isAddStory = false;
-                notifyListeners();
-              },
-              onAddLocation: () {
-                isAddLocation = true;
-                notifyListeners();
-              },
-            ),
-          ),
-        if (isAddLocation == true)
-          MaterialPage(
-            key: const ValueKey("AddLocationPage"),
-            child: PickLocationScreen(
-              onAdded: () {
-                isAddLocation = false;
-                notifyListeners();
-              },
-            ),
-          ),
-        if (isBuyPremium == true)
-          MaterialPage(
-            key: const ValueKey("BuyPremiumPage"),
-            child: BuyPremiumScreen(
-              onSuccess: () {
-                isBuyPremium = false;
-                notifyListeners();
-              },
-            ),
-          ),
-      ];
+  static final CurveTween _curveTween = CurveTween(curve: Curves.easeIn);
 }
