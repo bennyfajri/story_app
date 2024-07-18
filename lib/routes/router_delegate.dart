@@ -8,22 +8,21 @@ import 'package:story_app/screen/pick_location_screen.dart';
 
 import '../screen/login_screen.dart';
 import '../screen/register_screen.dart';
-import '../screen/splash_screen.dart';
 import '../screen/story_detail_screen.dart';
 
-class MyRoute {
+class MyRoute with ChangeNotifier {
   static String auth = "/auth";
   static String login = "login";
-  static String register = "auths/register";
+  static String register = "register";
 
   static String home = "/";
 
-  static String buyPremium = "/buy_premium";
+  static String buyPremium = "buy_premium";
   static String splash = "/splash";
 
   static String detailStory = "story/:storyId";
   static String addStory = "add_story";
-  static String addLocation = "/add_location";
+  static String addLocation = "add_location";
 
   static String toDetailStory(String storyId) => "/story/$storyId";
 
@@ -31,9 +30,11 @@ class MyRoute {
 
   static String toSettingBuyPremium() => "/buy_premium";
 
-  static String toLogin() => "/auth/login";
+  static String get toRegister => "/auth/register";
 
-  static String toRegister() => "/auth/register";
+  static String get toAddLocation => "/add_story/add_location";
+
+  bool isRegister = false;
 
   final AuthPrefs authPrefs;
   bool isLoggedIn = false;
@@ -47,52 +48,66 @@ class MyRoute {
         navigatorKey: navigatorKey,
         routes: <GoRoute>[
           GoRoute(
-            path: splash,
+            path: home,
             pageBuilder: (context, state) => FadeTransitionPage(
               key: state.pageKey,
-              child: const SplashScreen(),
+              child: HomePage(
+                onAddStory: () => context.go(toAddStory()),
+                onPremium: () => context.go(toSettingBuyPremium()),
+                onLogout: () => context.go(auth),
+                onStoryClicked: (id) => context.go(toDetailStory(id)),
+              ),
             ),
-            redirect: (_, __) => isLoggedIn ? home : login,
-          ),
-          GoRoute(
-              path: home,
-              pageBuilder: (context, state) => FadeTransitionPage(
-                    key: state.pageKey,
-                    child: HomePage(
-                      onAddStory: () => context.go(toAddStory()),
-                      onPremium: () => context.go(toSettingBuyPremium()),
-                      onLogout: () => context.go(toLogin()),
-                      onStoryClicked: (id) => context.go(toDetailStory(id)),
-                    ),
-                  ),
-              routes: [
-                GoRoute(
-                  path: detailStory,
-                  pageBuilder: (context, state) => FadeTransitionPage(
-                    key: state.pageKey,
-                    child: StoryDetailScreen(
-                      storyId: state.pathParameters['storyId']!,
-                    ),
+            routes: [
+              GoRoute(
+                path: detailStory,
+                pageBuilder: (context, state) => FadeTransitionPage(
+                  key: state.pageKey,
+                  child: StoryDetailScreen(
+                    storyId: state.pathParameters['storyId']!,
                   ),
                 ),
-                GoRoute(
+              ),
+              GoRoute(
                   path: addStory,
                   pageBuilder: (context, state) => FadeTransitionPage(
-                    key: state.pageKey,
-                    child: AddStoryScreen(
-                      onAddLocation: () {},
-                      onSuccessUpload: () {},
+                        key: state.pageKey,
+                        child: AddStoryScreen(
+                          onAddLocation: () => context.go(toAddLocation),
+                          onSuccessUpload: () => context.pop(),
+                        ),
+                      ),
+                  routes: [
+                    GoRoute(
+                      path: addLocation,
+                      pageBuilder: (context, state) => FadeTransitionPage(
+                        key: state.pageKey,
+                        child: PickLocationScreen(
+                          onAdded: () => context.pop(),
+                        ),
+                      ),
                     ),
-                  ),
+                  ]),
+              GoRoute(
+                path: buyPremium,
+                pageBuilder: (pageContext, state) => FadeTransitionPage(
+                  key: state.pageKey,
+                  child: BuyPremiumScreen(onSuccess: () {}),
                 ),
-              ]),
+              ),
+            ],
+          ),
           GoRoute(
             path: auth,
             pageBuilder: (context, state) => FadeTransitionPage(
               key: state.pageKey,
               child: LoginScreen(
                 onLogin: () => context.go(home),
-                onRegister: () => context.push(toRegister()),
+                onRegister: () {
+                  isRegister = true;
+                  notifyListeners();
+                  context.go(toRegister);
+                },
               ),
             ),
             routes: [
@@ -101,28 +116,25 @@ class MyRoute {
                 pageBuilder: (context, state) => FadeTransitionPage(
                   key: state.pageKey,
                   child: RegisterScreen(
-                    onLogin: () => context.go(auth),
-                    onRegister: () {},
+                    onLogin: () {
+                      isRegister = false;
+                      notifyListeners();
+                      context.go(auth);
+                    },
+                    onRegister: () {
+                      isRegister = false;
+                      notifyListeners();
+                      context.go(auth);
+                    },
                   ),
                 ),
+                onExit: (context, state) {
+                  isRegister = false;
+                  notifyListeners();
+                  return true;
+                },
               ),
             ],
-          ),
-          GoRoute(
-            path: addLocation,
-            pageBuilder: (context, state) => FadeTransitionPage(
-              key: state.pageKey,
-              child: PickLocationScreen(
-                onAdded: () {},
-              ),
-            ),
-          ),
-          GoRoute(
-            path: buyPremium,
-            pageBuilder: (pageContext, state) => FadeTransitionPage(
-              key: state.pageKey,
-              child: BuyPremiumScreen(onSuccess: () {}),
-            ),
           ),
         ],
         redirect: _guard,
@@ -131,19 +143,21 @@ class MyRoute {
 
   Future<String?> _guard(BuildContext context, GoRouterState state) async {
     final bool signedIn = await authPrefs.isLoggedIn();
-    final bool signingIn = state.matchedLocation == auth;
+    final bool signingIn = state.matchedLocation == auth || state.matchedLocation == toRegister;
 
-    if (!signingIn && !signedIn) {
+    if (isRegister && state.matchedLocation != toRegister) {
+      return toRegister;
+    } else if (!signedIn && !signingIn) {
       return auth;
-    } else if (signingIn && signedIn) {
+    } else if (signedIn && (state.matchedLocation == auth || state.matchedLocation == toRegister)) {
       return home;
     }
-
     return null;
   }
 
   void _init() async {
     isLoggedIn = await authPrefs.isLoggedIn();
+    notifyListeners();
   }
 }
 
