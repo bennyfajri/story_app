@@ -877,6 +877,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  random_data_generator:
+    dependency: "direct main"
+    description:
+      name: random_data_generator
+      sha256: f84c1958203bf827273e1ca17e819eacec37afb6cc6e56904976546d289e0784
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   rxdart:
     dependency: transitive
     description:

@@ -47,9 +47,26 @@ class StoryItem extends StatelessWidget {
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(description),
+            child: RichText(
+              text: TextSpan(
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge,
+                  children: [
+                    TextSpan(
+                        text:
+                        "$creatorName "),
+                    TextSpan(
+                      text:
+                      description,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium,
+                    ),
+                  ]),
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16,

@@ -20,12 +20,17 @@ class PersonHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(creatorName),
+        Text(
+          creatorName,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+        ),
         if (isTrailing) const Spacer(),
         if (isTrailing)
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_horiz),
           ),
       ],
     );

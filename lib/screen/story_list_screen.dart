@@ -123,8 +123,6 @@ class _StoryListScreenState extends State<StoryListScreen> {
                                       .read<StoryProvider>()
                                       .getDetailStory(id);
                                   widget.onStoryClicked(story.id);
-                                  // if(storyProvider.story != null) {
-                                  // }
                                 },
                               );
                             },

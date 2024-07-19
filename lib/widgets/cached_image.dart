@@ -7,38 +7,49 @@ class BuildCachedImage extends StatelessWidget {
     super.key,
     required this.photoUrl,
     required this.id,
+    this.isLongImage = false,
   });
 
   final String photoUrl;
   final String id;
+  final bool isLongImage;
 
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      imageUrl: photoUrl,
-      progressIndicatorBuilder: (context, url, progress) {
-        return Container(
-          color: Colors.grey,
+    return Hero(
+      tag: id,
+      child: CachedNetworkImage(
+        imageUrl: photoUrl,
+        alignment: Alignment.center,
+        width: double.infinity,
+        fit: BoxFit.fitHeight,
+        progressIndicatorBuilder: (context, url, progress) {
+          return Container(
+            color: Colors.grey,
+            height: 300,
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            ),
+          );
+        },
+        errorWidget: (context, error, stackTrace) => Container(
           height: 300,
+          color: Colors.grey,
           child: const Center(
-            child: CircularProgressIndicator(
-              color: Colors.white,
+            child: Icon(
+              Icons.error_outline,
+              size: 26,
             ),
           ),
-        );
-      },
-      fit: BoxFit.contain,
-      errorWidget: (context, error, stackTrace) => Container(
-        color: Colors.grey,
-        child: const Icon(
-          Icons.error_outline,
         ),
-      ),
-      cacheManager: CacheManager(
-        Config(
-          id,
-          stalePeriod: const Duration(days: 3),
-          maxNrOfCacheObjects: 10,
+        cacheManager: CacheManager(
+          Config(
+            id,
+            stalePeriod: const Duration(days: 3),
+            maxNrOfCacheObjects: 10,
+          ),
         ),
       ),
     );

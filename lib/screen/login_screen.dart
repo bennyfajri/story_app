@@ -21,7 +21,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver{
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
@@ -31,7 +31,36 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print("activity resumed");
+        break;
+      case AppLifecycleState.inactive:
+        print("activity inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("activity paused");
+        break;
+      case AppLifecycleState.detached:
+        print("activity detached");
+        break;
+      case AppLifecycleState.hidden:
+        print("activity hidden");
+        break;
+    }
   }
 
   @override

@@ -35,5 +35,7 @@
   "add_location": "Pick Location",
   "change_location": "Change Location",
   "only_premium_feature": "Upgrade to premium account to use this feature",
-  "add_location_error": "Choose location first!"
+  "add_location_error": "Choose location first!",
+  "reply": "Reply",
+  "likes": "Likes"
 }

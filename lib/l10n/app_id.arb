@@ -10,18 +10,18 @@
   "name_error_msg": "Nama tidak boleh kosong",
   "email_error_msg": "Email tidak boleh kosong",
   "password_error_msg": "Password tidak boleh kosong",
-  "home_title" : "Beranda",
-  "settings_title" : "Pengaturan",
-  "logout" : "Logout",
-  "account" : "Akun",
-  "theme" : "Tema",
-  "language" : "Bahasa",
+  "home_title": "Beranda",
+  "settings_title": "Pengaturan",
+  "logout": "Logout",
+  "account": "Akun",
+  "theme": "Tema",
+  "language": "Bahasa",
   "localeItem1": "Bahasa Indonesia",
   "localeItem2": "Bahasa Inggris",
-  "oops" : "Oops!",
-  "try_again" : "Ulangi kembali",
-  "no_data" : "Tidak ada data",
-  "add_story" : "Tambah Story",
+  "oops": "Oops!",
+  "try_again": "Ulangi kembali",
+  "no_data": "Tidak ada data",
+  "add_story": "Tambah Story",
   "description": "Deskripsi",
   "description_hint": "Masukkan deskripsi",
   "description_error_msg": "Deskripsi tidak boleh kosong",
@@ -30,7 +30,7 @@
   "upgrade_premium": "Upgrade Premium",
   "premium_user": "Member Premium",
   "upgrade_premium_desc": "Upgrade akun premium untuk mendapatkan segudang fitur tambahan",
-  "premiumPackagePrice" : "{premiumPrice}",
+  "premiumPackagePrice": "{premiumPrice}",
   "@premiumPackagePrice": {
     "placeholders": {
       "premiumPrice": {
@@ -46,5 +46,7 @@
   "add_location": "Pilih Lokasi",
   "change_location": "Ubah Lokasi",
   "only_premium_feature": "Upgrade Premium untuk menambahkan lokasi",
-  "add_location_error": "Pilih lokasi terlebih dahulu!"
+  "add_location_error": "Pilih lokasi terlebih dahulu!",
+  "reply": "Balas",
+  "likes": "Disukai"
 }
