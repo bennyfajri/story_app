@@ -48,10 +48,20 @@ class AccountScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 55,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        child: Text(
-                          accountInfo?.name.substring(0, 1) ?? '',
-                          style: Theme.of(context).textTheme.titleLarge,
+                        child: Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: buildLinearGradient(context),
+                          ),
+                          child: Text(
+                            accountInfo?.name.substring(0, 1) ?? '',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Colors.white
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 64),
@@ -74,17 +84,22 @@ class AccountScreen extends StatelessWidget {
                         leading: const Icon(Icons.flag_outlined),
                         title: Text(appLocale.language),
                         trailing: DropdownButton(
-                          icon: Text(
-                              Localization.getFlag(settingProvider.languageCode)),
-                          items: AppLocalizations.supportedLocales.map((Locale locale) {
-                            final flag = Localization.getFlag(locale.languageCode);
-                            final accFlag = getLanguageAccessibility(context, locale.languageCode);
+                          icon: Text(Localization.getFlag(
+                              settingProvider.languageCode)),
+                          items: AppLocalizations.supportedLocales
+                              .map((Locale locale) {
+                            final flag =
+                                Localization.getFlag(locale.languageCode);
+                            final accFlag = getLanguageAccessibility(
+                                context, locale.languageCode);
                             return DropdownMenuItem(
                               value: locale,
                               child: Center(
                                 child: Text(
                                   flag,
-                                  style: Theme.of(context).textTheme.headlineMedium,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium,
                                   semanticsLabel: accFlag,
                                 ),
                               ),
@@ -105,34 +120,31 @@ class AccountScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(50),
                         child: Ink(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Theme.of(context).colorScheme.primary,
-                                Theme.of(context).colorScheme.secondary,
-                              ],
-                            ),
+                            gradient: buildLinearGradient(context),
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: ListTile(
                             leading: Icon(
-                              isPremiumUser ? Icons.verified_outlined : Icons.person,
+                              isPremiumUser
+                                  ? Icons.verified_outlined
+                                  : Icons.person,
                               color: Colors.white,
                             ),
                             title: Text(
-                              isPremiumUser ? appLocale.premium_user : appLocale.upgrade_premium,
+                              isPremiumUser
+                                  ? appLocale.premium_user
+                                  : appLocale.upgrade_premium,
                               style: const TextStyle(color: Colors.white),
                             ),
                             trailing: isPremiumUser
                                 ? null
                                 : IconButton(
-                              icon: const Icon(
-                                Icons.upgrade_outlined,
-                                color: Colors.white,
-                              ),
-                              onPressed: (){},
-                            ),
+                                    icon: const Icon(
+                                      Icons.upgrade_outlined,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: () {},
+                                  ),
                           ),
                         ),
                       ),
@@ -179,6 +191,17 @@ class AccountScreen extends StatelessWidget {
     });
   }
 
+  LinearGradient buildLinearGradient(BuildContext context) {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Theme.of(context).colorScheme.primary,
+        Theme.of(context).colorScheme.secondary,
+      ],
+    );
+  }
+
   String getLanguageAccessibility(BuildContext context, String languageCode) {
     switch (languageCode) {
       case "en":
@@ -189,4 +212,3 @@ class AccountScreen extends StatelessWidget {
     }
   }
 }
-

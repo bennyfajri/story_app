@@ -35,6 +35,8 @@ dependencies:
   location: ^7.0.0
   geocoding: ^3.0.0
   random_data_generator: ^0.0.2
+  adaptive_navigation: ^0.0.10
+  adaptive_breakpoints: ^0.1.7
 
 dev_dependencies:
   flutter_test:

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:story_app/data/db/auth_prefs.dart';
+import 'package:story_app/routes/scaffold_tab.dart';
+import 'package:story_app/screen/account_screen.dart';
 import 'package:story_app/screen/add_story_screen.dart';
 import 'package:story_app/screen/buy_premium_screen.dart';
-import 'package:story_app/screen/home_screen.dart';
 import 'package:story_app/screen/pick_location_screen.dart';
+import 'package:story_app/screen/story_list_screen.dart';
 
 import '../screen/login_screen.dart';
 import '../screen/register_screen.dart';
@@ -12,10 +14,10 @@ import '../screen/story_detail_screen.dart';
 
 class MyRoute with ChangeNotifier {
   static String auth = "/auth";
-  static String login = "login";
   static String register = "register";
 
-  static String home = "/";
+  static String home = "/home";
+  static String settings = "/settings";
 
   static String buyPremium = "buy_premium";
   static String splash = "/splash";
@@ -24,15 +26,15 @@ class MyRoute with ChangeNotifier {
   static String addStory = "add_story";
   static String addLocation = "add_location";
 
-  static String toDetailStory(String storyId) => "/story/$storyId";
+  static String toDetailStory(String storyId) => "/home/story/$storyId";
 
-  static String toAddStory() => "/add_story";
+  static String get toAddStory => "/home/add_story";
 
-  static String toSettingBuyPremium() => "/buy_premium";
+  static String get toSettingBuyPremium => "/settings/buy_premium";
 
   static String get toRegister => "/auth/register";
 
-  static String get toAddLocation => "/add_story/add_location";
+  static String get toAddLocation => "/home/add_story/add_location";
 
   bool isRegister = false;
 
@@ -44,18 +46,23 @@ class MyRoute with ChangeNotifier {
     _init();
   }
 
-  GoRouter appRouter() => GoRouter(
+  GoRouter get appRouter => GoRouter(
         navigatorKey: navigatorKey,
         routes: <GoRoute>[
+          GoRoute(
+            path: '/',
+            redirect: (context, state) => home,
+          ),
           GoRoute(
             path: home,
             pageBuilder: (context, state) => FadeTransitionPage(
               key: state.pageKey,
-              child: HomePage(
-                onAddStory: () => context.go(toAddStory()),
-                onPremium: () => context.go(toSettingBuyPremium()),
-                onLogout: () => context.go(auth),
-                onStoryClicked: (id) => context.go(toDetailStory(id)),
+              child: StoryScaffold(
+                selectedTab: ScaffoldTab.home,
+                child: StoryListScreen(
+                  onAddStory: () => context.go(toAddStory),
+                  onStoryClicked: (id) => context.go(toDetailStory(id)),
+                ),
               ),
             ),
             routes: [
@@ -69,25 +76,41 @@ class MyRoute with ChangeNotifier {
                 ),
               ),
               GoRoute(
-                  path: addStory,
-                  pageBuilder: (context, state) => FadeTransitionPage(
-                        key: state.pageKey,
-                        child: AddStoryScreen(
-                          onAddLocation: () => context.go(toAddLocation),
-                          onSuccessUpload: () => context.pop(),
-                        ),
-                      ),
-                  routes: [
-                    GoRoute(
-                      path: addLocation,
-                      pageBuilder: (context, state) => FadeTransitionPage(
-                        key: state.pageKey,
-                        child: PickLocationScreen(
-                          onAdded: () => context.pop(),
-                        ),
+                path: addStory,
+                pageBuilder: (context, state) => FadeTransitionPage(
+                  key: state.pageKey,
+                  child: AddStoryScreen(
+                    onAddLocation: () => context.go(toAddLocation),
+                    onSuccessUpload: () => context.pop(),
+                  ),
+                ),
+                routes: [
+                  GoRoute(
+                    path: addLocation,
+                    pageBuilder: (context, state) => FadeTransitionPage(
+                      key: state.pageKey,
+                      child: PickLocationScreen(
+                        onAdded: () => context.pop(),
                       ),
                     ),
-                  ]),
+                  ),
+                ],
+              ),
+            ]
+          ),
+          GoRoute(
+            path: settings,
+            pageBuilder: (context, state) => FadeTransitionPage(
+              key: state.pageKey,
+              child: StoryScaffold(
+                selectedTab: ScaffoldTab.settings,
+                child: AccountScreen(
+                  onLogout: () => context.go(auth),
+                  onPremium: () => context.go(toSettingBuyPremium),
+                ),
+              ),
+            ),
+            routes: [
               GoRoute(
                 path: buyPremium,
                 pageBuilder: (pageContext, state) => FadeTransitionPage(
@@ -95,7 +118,7 @@ class MyRoute with ChangeNotifier {
                   child: BuyPremiumScreen(onSuccess: () {}),
                 ),
               ),
-            ],
+            ]
           ),
           GoRoute(
             path: auth,
@@ -143,14 +166,15 @@ class MyRoute with ChangeNotifier {
 
   Future<String?> _guard(BuildContext context, GoRouterState state) async {
     final bool signedIn = await authPrefs.isLoggedIn();
-    final bool signingIn = state.matchedLocation == auth || state.matchedLocation == toRegister;
+    final bool signingIn =
+        state.matchedLocation == auth || state.matchedLocation == toRegister;
 
-    if (isRegister && state.matchedLocation != toRegister) {
+    print("mmatched location : ${state.matchedLocation}");
+
+    if (isRegister && state.matchedLocation == toRegister) {
       return toRegister;
     } else if (!signedIn && !signingIn) {
       return auth;
-    } else if (signedIn && (state.matchedLocation == auth || state.matchedLocation == toRegister)) {
-      return home;
     }
     return null;
   }
