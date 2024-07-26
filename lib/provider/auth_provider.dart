@@ -6,15 +6,16 @@ import 'package:story_app/data/models/register/register_request.dart';
 
 import '../data/api/auth_service.dart';
 import '../data/db/auth_prefs.dart';
+import '../data/models/login/login_result.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService authService;
   final AuthPrefs authPrefs;
 
-  ApiState loginState = const ApiStateInitial();
-  ApiState registerState = const ApiStateInitial();
-  LoadingState accountState = const LoadingState.loaded();
-  LoadingState logoutState = const LoadingState.loaded();
+  ApiState loginState = const ApiState.initial();
+  ApiState registerState = const ApiState.initial();
+  DataState<LoginResult?> accountState = const DataState.loading();
+  DataState logoutState = const DataState.loading();
 
   AuthProvider({
     required this.authService,
@@ -37,7 +38,7 @@ class AuthProvider extends ChangeNotifier {
       await Future.delayed(const Duration(milliseconds: 1500));
     }
     loginState = ApiState.loaded(serverResponse.loginResult);
-    accountState = LoadingState.loaded(serverResponse.loginResult);
+    accountState = DataState.loaded(serverResponse.loginResult);
 
     notifyListeners();
 
@@ -62,7 +63,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> logout() async {
-    logoutState = const LoadingState.loading();
+    logoutState = const DataState.loading();
     notifyListeners();
 
     final logout = await authPrefs.logout();
@@ -70,8 +71,8 @@ class AuthProvider extends ChangeNotifier {
       await authPrefs.deleteLoginInfo();
     }
 
-    accountState = LoadingState.loaded(await authPrefs.getLoginInfo());
-    logoutState = LoadingState.loaded(await authPrefs.getLoginInfo());
+    accountState = DataState.loaded(await authPrefs.getLoginInfo());
+    logoutState = DataState.loaded(await authPrefs.getLoginInfo());
     notifyListeners();
 
     return !await authPrefs.isLoggedIn();
@@ -79,7 +80,7 @@ class AuthProvider extends ChangeNotifier {
 
   void _initLoginInfo() async {
     final loginInfo = await authPrefs.getLoginInfo();
-    accountState = LoadingState.loaded(loginInfo);
+    accountState = DataState.loaded(loginInfo);
     notifyListeners();
   }
 }

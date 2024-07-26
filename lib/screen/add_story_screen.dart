@@ -2,15 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:story_app/provider/add_location_provider.dart';
+import 'package:story_app/provider/image_gallery_provider.dart';
 import 'package:story_app/provider/take_image_provider.dart';
-
-import '../my_app.dart';
-import '../provider/settings_provider.dart';
-import '../provider/story_provider.dart';
-import '../util/constant.dart';
+import 'package:story_app/widgets/image_item_widget.dart';
 
 class AddStoryScreen extends StatefulWidget {
   const AddStoryScreen({
@@ -32,209 +28,115 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final settingProvider = context.watch<SettingsProvider>();
-    final addLocationProvider = context.watch<AddLocationProvider>();
-
-    final uploadState = context.watch<StoryProvider>().uploadStoryState;
-    final isPremiumUser = settingProvider.isPremiumUser;
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(appLocale.add_story),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                context.watch<TakeImageProvider>().imagePath == null
-                    ? const Align(
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.image,
-                          size: 100,
-                        ),
-                      )
-                    : _showImage(),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _onGalleryView,
-                      child: Text(appLocale.gallery),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            expandedHeight: size.height * 0.4,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Consumer<TakeImageProvider>(
+                builder: (context, takeImgProvider, child) {
+                  if (takeImgProvider.imagePath != null) {
+                    final imagePath = takeImgProvider.imagePath;
+                    return kIsWeb
+                        ? Image.network(
+                            imagePath.toString(),
+                            fit: BoxFit.fitHeight,
+                          )
+                        : Image.file(
+                            File(imagePath.toString()),
+                            fit: BoxFit.fitHeight,
+                          );
+                  } else {
+                    return Container(
+                      color: Colors.grey,
+                    );
+                  }
+                },
+              ),
+            ),
+            bottom: AppBar(
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Consumer<ImageGalleryProvider>(
+                      builder: (context, provider, child) {
+                        return provider.paths.map(
+                          loading: (value) {
+                            return const SizedBox.shrink();
+                          },
+                          loaded: (value) {
+                            final paths = value.data;
+                            return DropdownButtonHideUnderline(
+                              child: DropdownButton<AssetPathEntity>(
+                                isExpanded: true,
+                                elevation: 16,
+                                value: provider.filterPath ?? paths.firstOrNull,
+                                items: paths
+                                    .map(
+                                      (e) => DropdownMenuItem(
+                                        value: e,
+                                        child: Text(e.name),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: provider.setFilterPath,
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: _onCameraView,
-                      child: Text(appLocale.camera),
-                    ),
-                  ],
-                ),
-                TextFormField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    hintText: appLocale.description_hint,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return appLocale.description_error_msg;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isPremiumUser ? widget.onAddLocation : null,
-                    child: Text(
-                      addLocationProvider.pickedAddress != null
-                          ? appLocale.change_location
-                          : appLocale.add_location,
-                    ),
-                  ),
-                ),
-                if (addLocationProvider.pickedAddress != null)
-                  const SizedBox(height: 8),
-                if (addLocationProvider.pickedAddress != null)
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined),
-                      Expanded(
-                        child: Text(
-                          addLocationProvider.pickedAddress!,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    ],
-                  ),
-                if (!isPremiumUser)
-                  Text(
-                    appLocale.only_premium_feature,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                const SizedBox(height: 36),
-                uploadState.map(
-                  initial: (value) {
-                    return buildUploadButton(context);
-                  },
-                  loading: (value) {
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                  loaded: (value) {
-                    return buildUploadButton(context);
-                  },
-                  error: (value) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      showSnackbar(
-                        context: context,
-                        message: value.message,
-                      );
-                    });
-                    return buildUploadButton(context);
-                  },
-                ),
-              ],
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.camera_alt_outlined),
+                  )
+                ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  SizedBox buildUploadButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () async {
-          if (formKey.currentState!.validate()) {
-            final takeImageProvider = context.read<TakeImageProvider>();
-            final locationProvider = context.read<AddLocationProvider>();
-            final storyProvider = context.read<StoryProvider>();
-
-            final imagePath = takeImageProvider.imagePath;
-            final imageFile = takeImageProvider.imageFile;
-            if (imagePath == null || imageFile == null) return;
-            final fileName = imageFile.name;
-            final bytes = await imageFile.readAsBytes();
-            final newBytes = await compressImage(bytes);
-
-            final addNewStory = await storyProvider.addNewStory(
-              newBytes,
-              fileName,
-              descriptionController.text,
-              locationProvider.pickedLatLng?.latitude,
-              locationProvider.pickedLatLng?.longitude,
-            );
-            if (addNewStory) {
-              takeImageProvider.setImageFile(null);
-              takeImageProvider.setImagePath(null);
-              locationProvider.setPickedAddress(null);
-              locationProvider.setPickedLatLng(null);
-              await storyProvider.getStories(true);
-
-              widget.onSuccessUpload();
-            }
-          }
-        },
-        child: Text(appLocale.add_story),
-      ),
-    );
-  }
-
-  _onGalleryView() async {
-    final provider = context.read<TakeImageProvider>();
-
-    final isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-    final isLinux = defaultTargetPlatform == TargetPlatform.linux;
-    if (isMacOS || isLinux) return;
-
-    final ImagePicker picker = ImagePicker();
-
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      provider.setImageFile(pickedFile);
-      provider.setImagePath(pickedFile.path);
-    }
-  }
-
-  _onCameraView() async {
-    final provider = context.read<TakeImageProvider>();
-
-    final isAndroid = defaultTargetPlatform == TargetPlatform.android;
-    final isiOS = defaultTargetPlatform == TargetPlatform.iOS;
-    final isNotMobile = !(isAndroid || isiOS);
-    if (isNotMobile) return;
-
-    final ImagePicker picker = ImagePicker();
-
-    final XFile? pickedFile = await picker.pickImage(
-      source: ImageSource.camera,
-    );
-
-    if (pickedFile != null) {
-      provider.setImageFile(pickedFile);
-      provider.setImagePath(pickedFile.path);
-    }
-  }
-
-  Widget _showImage() {
-    final imagePath = context.read<TakeImageProvider>().imagePath;
-
-    return kIsWeb
-        ? Image.network(
-            imagePath.toString(),
-            fit: BoxFit.contain,
+          Consumer<ImageGalleryProvider>(
+            builder: (context, provider, child) {
+              return provider.images.map(
+                loading: (value) {
+                  return const SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                },
+                loaded: (value) {
+                  final images = value.data;
+                  return SliverGrid.builder(
+                    itemCount: images.length,
+                    itemBuilder: (context, index) {
+                      final image = images[index];
+                      return ImageItemWidget(
+                        entity: image,
+                        option: const ThumbnailOption(
+                          size: ThumbnailSize.square(200),
+                        ),
+                      );
+                    },
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      childAspectRatio: 1,
+                          crossAxisSpacing: 2,
+                          mainAxisSpacing: 2,
+                    ),
+                  );
+                },
+              );
+            },
           )
-        : Image.file(
-            File(imagePath.toString()),
-            fit: BoxFit.contain,
-          );
+        ],
+      ),
+    );
   }
 }

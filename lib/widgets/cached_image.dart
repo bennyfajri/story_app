@@ -7,12 +7,10 @@ class BuildCachedImage extends StatelessWidget {
     super.key,
     required this.photoUrl,
     required this.id,
-    this.isLongImage = false,
   });
 
   final String photoUrl;
   final String id;
-  final bool isLongImage;
 
   @override
   Widget build(BuildContext context) {

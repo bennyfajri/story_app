@@ -18,23 +18,22 @@ class MyRoute with ChangeNotifier {
 
   static String home = "/home";
   static String settings = "/settings";
+  static String addStory = "/add_story";
 
   static String buyPremium = "buy_premium";
   static String splash = "/splash";
 
   static String detailStory = "story/:storyId";
-  static String addStory = "add_story";
   static String addLocation = "add_location";
 
   static String toDetailStory(String storyId) => "/home/story/$storyId";
 
-  static String get toAddStory => "/home/add_story";
 
   static String get toSettingBuyPremium => "/settings/buy_premium";
 
   static String get toRegister => "/auth/register";
 
-  static String get toAddLocation => "/home/add_story/add_location";
+  static String get toAddLocation => "/add_story/add_location";
 
   bool isRegister = false;
 
@@ -60,7 +59,7 @@ class MyRoute with ChangeNotifier {
               child: StoryScaffold(
                 selectedTab: ScaffoldTab.home,
                 child: StoryListScreen(
-                  onAddStory: () => context.go(toAddStory),
+                  onAddStory: () => context.go(addStory),
                   onStoryClicked: (id) => context.go(toDetailStory(id)),
                 ),
               ),
@@ -75,28 +74,31 @@ class MyRoute with ChangeNotifier {
                   ),
                 ),
               ),
+            ]
+          ),
+          GoRoute(
+            path: addStory,
+            pageBuilder: (context, state) => FadeTransitionPage(
+              key: state.pageKey,
+              child: StoryScaffold(
+                selectedTab: ScaffoldTab.addStory,
+                child: AddStoryScreen(
+                  onAddLocation: () => context.go(toAddLocation),
+                  onSuccessUpload: () => context.go(home),
+                ),
+              ),
+            ),
+            routes: [
               GoRoute(
-                path: addStory,
+                path: addLocation,
                 pageBuilder: (context, state) => FadeTransitionPage(
                   key: state.pageKey,
-                  child: AddStoryScreen(
-                    onAddLocation: () => context.go(toAddLocation),
-                    onSuccessUpload: () => context.pop(),
+                  child: PickLocationScreen(
+                    onAdded: () => context.pop(),
                   ),
                 ),
-                routes: [
-                  GoRoute(
-                    path: addLocation,
-                    pageBuilder: (context, state) => FadeTransitionPage(
-                      key: state.pageKey,
-                      child: PickLocationScreen(
-                        onAdded: () => context.pop(),
-                      ),
-                    ),
-                  ),
-                ],
               ),
-            ]
+            ],
           ),
           GoRoute(
             path: settings,

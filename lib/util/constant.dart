@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
 
 const baseUrl = "https://story-api.dicoding.dev/v1/";
 
@@ -65,4 +67,11 @@ Future<List<int>> resizeImage(List<int> bytes) async {
   } while (length > 1000000);
 
   return newByte;
+}
+
+Future<XFile?> assetEntityToXFile(File? file) async {
+  if (file != null) {
+    return XFile(file.path);
+  }
+  return null;
 }

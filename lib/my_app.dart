@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/provider/add_location_provider.dart';
 import 'package:story_app/provider/auth_provider.dart';
+import 'package:story_app/provider/image_gallery_provider.dart';
 import 'package:story_app/provider/settings_provider.dart';
 import 'package:story_app/provider/story_provider.dart';
 import 'package:story_app/provider/take_image_provider.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => storyProvider),
         ChangeNotifierProvider(create: (context) => takeImageProvider),
         ChangeNotifierProvider(create: (context) => addLocationProvider),
+        ChangeNotifierProvider(create: (context) => imageGalleryProvider),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, provider, child) {
@@ -48,7 +50,8 @@ class MyApp extends StatelessWidget {
 MyRoute get myRoute => getIt<MyRoute>();
 
 AppLocalizations get appLocale {
-  final currentContext = getIt<MyRoute>().appRouter.configuration.navigatorKey.currentContext;
+  final currentContext =
+      getIt<MyRoute>().appRouter.configuration.navigatorKey.currentContext;
   return AppLocalizations.of(currentContext!)!;
 }
 
@@ -67,3 +70,5 @@ StoryProvider get storyProvider => getIt<StoryProvider>();
 TakeImageProvider get takeImageProvider => getIt<TakeImageProvider>();
 
 AddLocationProvider get addLocationProvider => getIt<AddLocationProvider>();
+
+ImageGalleryProvider get imageGalleryProvider => getIt<ImageGalleryProvider>();

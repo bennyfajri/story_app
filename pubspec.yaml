@@ -37,6 +37,8 @@ dependencies:
   random_data_generator: ^0.0.2
   adaptive_navigation: ^0.0.10
   adaptive_breakpoints: ^0.1.7
+  photo_manager: ^3.2.2
+  photo_manager_image_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:

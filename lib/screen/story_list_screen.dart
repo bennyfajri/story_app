@@ -50,7 +50,6 @@ class _StoryListScreenState extends State<StoryListScreen> {
   @override
   Widget build(BuildContext context) {
     final storyProvider = context.watch<StoryProvider>();
-    final storyState = storyProvider.storyState;
     final screenWidth = MediaQuery.of(context).size.width;
 
     Future<void> getStories([bool isRefreshing = false]) async {
@@ -73,8 +72,8 @@ class _StoryListScreenState extends State<StoryListScreen> {
         ],
       ),
       body: Consumer<StoryProvider>(
-        builder: (context, value, child) {
-          return storyState.map(
+        builder: (context, provider, child) {
+          return provider.storyState.map(
             initial: (value) {
               return Container();
             },
