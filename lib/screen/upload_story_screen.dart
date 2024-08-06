@@ -70,7 +70,7 @@ class _AddStoryScreenState extends State<UploadStoryScreen> {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: _onCameraView,
+                      onPressed: (){},
                       child: Text(appLocale.camera),
                     ),
                   ],
@@ -198,26 +198,6 @@ class _AddStoryScreenState extends State<UploadStoryScreen> {
 
     final XFile? pickedFile =
         await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      provider.setImageFile(pickedFile);
-      provider.setImagePath(pickedFile.path);
-    }
-  }
-
-  _onCameraView() async {
-    final provider = context.read<TakeImageProvider>();
-
-    final isAndroid = defaultTargetPlatform == TargetPlatform.android;
-    final isiOS = defaultTargetPlatform == TargetPlatform.iOS;
-    final isNotMobile = !(isAndroid || isiOS);
-    if (isNotMobile) return;
-
-    final ImagePicker picker = ImagePicker();
-
-    final XFile? pickedFile = await picker.pickImage(
-      source: ImageSource.camera,
-    );
-
     if (pickedFile != null) {
       provider.setImageFile(pickedFile);
       provider.setImagePath(pickedFile.path);

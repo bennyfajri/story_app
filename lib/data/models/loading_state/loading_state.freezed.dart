@@ -18,18 +18,21 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$DataState<T> {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() empty,
     required TResult Function() loading,
     required TResult Function(T data) loaded,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? empty,
     TResult? Function()? loading,
     TResult? Function(T data)? loaded,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? empty,
     TResult Function()? loading,
     TResult Function(T data)? loaded,
     required TResult orElse(),
@@ -37,18 +40,21 @@ mixin _$DataState<T> {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(DataStateEmpty<T> value) empty,
     required TResult Function(DataStateLoading<T> value) loading,
     required TResult Function(DataStateLoaded<T> value) loaded,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(DataStateEmpty<T> value)? empty,
     TResult? Function(DataStateLoading<T> value)? loading,
     TResult? Function(DataStateLoaded<T> value)? loaded,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(DataStateEmpty<T> value)? empty,
     TResult Function(DataStateLoading<T> value)? loading,
     TResult Function(DataStateLoaded<T> value)? loaded,
     required TResult orElse(),
@@ -72,6 +78,114 @@ class _$DataStateCopyWithImpl<T, $Res, $Val extends DataState<T>>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+}
+
+/// @nodoc
+abstract class _$$DataStateEmptyImplCopyWith<T, $Res> {
+  factory _$$DataStateEmptyImplCopyWith(_$DataStateEmptyImpl<T> value,
+          $Res Function(_$DataStateEmptyImpl<T>) then) =
+      __$$DataStateEmptyImplCopyWithImpl<T, $Res>;
+}
+
+/// @nodoc
+class __$$DataStateEmptyImplCopyWithImpl<T, $Res>
+    extends _$DataStateCopyWithImpl<T, $Res, _$DataStateEmptyImpl<T>>
+    implements _$$DataStateEmptyImplCopyWith<T, $Res> {
+  __$$DataStateEmptyImplCopyWithImpl(_$DataStateEmptyImpl<T> _value,
+      $Res Function(_$DataStateEmptyImpl<T>) _then)
+      : super(_value, _then);
+}
+
+/// @nodoc
+
+class _$DataStateEmptyImpl<T> implements DataStateEmpty<T> {
+  const _$DataStateEmptyImpl();
+
+  @override
+  String toString() {
+    return 'DataState<$T>.empty()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$DataStateEmptyImpl<T>);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() empty,
+    required TResult Function() loading,
+    required TResult Function(T data) loaded,
+  }) {
+    return empty();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? empty,
+    TResult? Function()? loading,
+    TResult? Function(T data)? loaded,
+  }) {
+    return empty?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? empty,
+    TResult Function()? loading,
+    TResult Function(T data)? loaded,
+    required TResult orElse(),
+  }) {
+    if (empty != null) {
+      return empty();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(DataStateEmpty<T> value) empty,
+    required TResult Function(DataStateLoading<T> value) loading,
+    required TResult Function(DataStateLoaded<T> value) loaded,
+  }) {
+    return empty(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(DataStateEmpty<T> value)? empty,
+    TResult? Function(DataStateLoading<T> value)? loading,
+    TResult? Function(DataStateLoaded<T> value)? loaded,
+  }) {
+    return empty?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(DataStateEmpty<T> value)? empty,
+    TResult Function(DataStateLoading<T> value)? loading,
+    TResult Function(DataStateLoaded<T> value)? loaded,
+    required TResult orElse(),
+  }) {
+    if (empty != null) {
+      return empty(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class DataStateEmpty<T> implements DataState<T> {
+  const factory DataStateEmpty() = _$DataStateEmptyImpl<T>;
 }
 
 /// @nodoc
@@ -113,6 +227,7 @@ class _$DataStateLoadingImpl<T> implements DataStateLoading<T> {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() empty,
     required TResult Function() loading,
     required TResult Function(T data) loaded,
   }) {
@@ -122,6 +237,7 @@ class _$DataStateLoadingImpl<T> implements DataStateLoading<T> {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? empty,
     TResult? Function()? loading,
     TResult? Function(T data)? loaded,
   }) {
@@ -131,6 +247,7 @@ class _$DataStateLoadingImpl<T> implements DataStateLoading<T> {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? empty,
     TResult Function()? loading,
     TResult Function(T data)? loaded,
     required TResult orElse(),
@@ -144,6 +261,7 @@ class _$DataStateLoadingImpl<T> implements DataStateLoading<T> {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(DataStateEmpty<T> value) empty,
     required TResult Function(DataStateLoading<T> value) loading,
     required TResult Function(DataStateLoaded<T> value) loaded,
   }) {
@@ -153,6 +271,7 @@ class _$DataStateLoadingImpl<T> implements DataStateLoading<T> {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(DataStateEmpty<T> value)? empty,
     TResult? Function(DataStateLoading<T> value)? loading,
     TResult? Function(DataStateLoaded<T> value)? loaded,
   }) {
@@ -162,6 +281,7 @@ class _$DataStateLoadingImpl<T> implements DataStateLoading<T> {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(DataStateEmpty<T> value)? empty,
     TResult Function(DataStateLoading<T> value)? loading,
     TResult Function(DataStateLoaded<T> value)? loaded,
     required TResult orElse(),
@@ -243,6 +363,7 @@ class _$DataStateLoadedImpl<T> implements DataStateLoaded<T> {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() empty,
     required TResult Function() loading,
     required TResult Function(T data) loaded,
   }) {
@@ -252,6 +373,7 @@ class _$DataStateLoadedImpl<T> implements DataStateLoaded<T> {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? empty,
     TResult? Function()? loading,
     TResult? Function(T data)? loaded,
   }) {
@@ -261,6 +383,7 @@ class _$DataStateLoadedImpl<T> implements DataStateLoaded<T> {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? empty,
     TResult Function()? loading,
     TResult Function(T data)? loaded,
     required TResult orElse(),
@@ -274,6 +397,7 @@ class _$DataStateLoadedImpl<T> implements DataStateLoaded<T> {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(DataStateEmpty<T> value) empty,
     required TResult Function(DataStateLoading<T> value) loading,
     required TResult Function(DataStateLoaded<T> value) loaded,
   }) {
@@ -283,6 +407,7 @@ class _$DataStateLoadedImpl<T> implements DataStateLoaded<T> {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(DataStateEmpty<T> value)? empty,
     TResult? Function(DataStateLoading<T> value)? loading,
     TResult? Function(DataStateLoaded<T> value)? loaded,
   }) {
@@ -292,6 +417,7 @@ class _$DataStateLoadedImpl<T> implements DataStateLoaded<T> {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(DataStateEmpty<T> value)? empty,
     TResult Function(DataStateLoading<T> value)? loading,
     TResult Function(DataStateLoaded<T> value)? loaded,
     required TResult orElse(),
